@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.example.moviecatalogservice.grpc"; 
+option java_package = "com.moviecatalogservice.grpc";
 option java_multiple_files = true;
 
 service TrendingService {

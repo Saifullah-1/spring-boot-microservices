@@ -120,10 +120,10 @@ public class MovieCatalogResource {
 
         // 2. Map the gRPC response objects to CatalogItems
         return response.getMoviesList().stream()
-                .map(movie -> new CatalogItem(
-                        "Movie ID: " + movie.getMovieId(),
-                        "Trending Score: " + movie.getAverageRating(),
-                        0))
+                .map(movie -> movieInfoService.getCatalogItem(new Rating(
+                        movie.getMovieId(),
+                        (int) movie.getAverageRating()
+                )))
                 .collect(Collectors.toList());
     }
 }

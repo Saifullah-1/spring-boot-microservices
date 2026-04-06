@@ -4,34 +4,39 @@ import com.example.trendingmoviesservice.grpc.EmptyRequest;
 import com.example.trendingmoviesservice.grpc.TrendingMovie;
 import com.example.trendingmoviesservice.grpc.TrendingMoviesResponse;
 import com.example.trendingmoviesservice.grpc.TrendingServiceGrpc;
+import com.example.trendingmoviesservice.repository.RatingRepository;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TrendingServiceImpl extends TrendingServiceGrpc.TrendingServiceImplBase {
+    private final RatingRepository ratingRepository;
+
+    public TrendingServiceImpl(RatingRepository ratingRepository) {
+        this.ratingRepository = ratingRepository;
+    }
 
     @Override
     public void getTopMovies(EmptyRequest request, StreamObserver<TrendingMoviesResponse> responseObserver) {
-        
-        System.out.println("Received gRPC request for Top Movies!");
 
-        // In the final version, your teammate will query MySQL here. 
-        // For now, we return mock data to prove the gRPC connection works.
-        TrendingMovie movie1 = TrendingMovie.newBuilder().setMovieId("100").setAverageRating(4.9).build();
-        TrendingMovie movie2 = TrendingMovie.newBuilder().setMovieId("200").setAverageRating(4.8).build();
-        TrendingMovie movie3 = TrendingMovie.newBuilder().setMovieId("300").setAverageRating(4.7).build();
+        System.out.println("Received gRPC request for Top Movies from MySQL!");
 
-        // Build the final response list
-        TrendingMoviesResponse response = TrendingMoviesResponse.newBuilder()
-                .addMovies(movie1)
-                .addMovies(movie2)
-                .addMovies(movie3)
-                .build();
+        List<Object[]> topMovies = ratingRepository.findTopMovies();
 
-        // Send the response back to the client (Catalog Service)
-        responseObserver.onNext(response);
-        
-        // Tell the client we are done sending data
+        TrendingMoviesResponse.Builder responseBuilder = TrendingMoviesResponse.newBuilder();
+
+        for (Object[] topMovie : topMovies) {
+            TrendingMovie movie = TrendingMovie.newBuilder()
+                    .setMovieId(topMovie[0].toString())
+                    .setAverageRating(Double.parseDouble(topMovie[1].toString()))
+                    .build();
+
+            responseBuilder.addMovies(movie);
+        }
+
+        responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
 }
