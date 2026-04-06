@@ -1,7 +1,17 @@
 package com.example.ratingsservice.models;
 
-public class Rating {
+import javax.persistence.*;
 
+@Entity
+@Table(name = "rating", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"userId", "movieId"})
+})
+public class Rating {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    private String userId;
     private String movieId;
     private int rating;
 
@@ -11,6 +21,19 @@ public class Rating {
     public Rating(String movieId, int rating) {
         this.movieId = movieId;
         this.rating = rating;
+    }
+
+    public Rating(String userId, String movieId, int rating) {
+        this(movieId, rating);
+        this.userId = userId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getMovieId() {
